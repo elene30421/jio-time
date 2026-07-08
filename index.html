@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>揪時間</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF3F1;
+    --paper:#FFFFFF;
+    --ink:#1E2A28;
+    --ink-soft:#5B6F6A;
+    --line:#D7E2DE;
+    --brand:#0F6B5C;
+    --brand-dark:#0B4F44;
+    --amber:#F2A93B;
+    --amber-dark:#C7861E;
+    --heat-0:#E7F0EC;
+    --heat-1:#B9DACD;
+    --heat-2:#7CBCA6;
+    --heat-3:#3E9781;
+    --heat-4:#0F6B5C;
+    --danger:#C0503E;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(15,40,33,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(15,107,92,0.06) 1px, transparent 0);
+    background-size:18px 18px;
+    color:var(--ink);
+    font-family:'Noto Sans TC', sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #app{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding-bottom:32px;
+  }
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px 8px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .pin{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 0 3px rgba(242,169,59,0.25);
+  }
+  .brand-text{
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:20px;
+    letter-spacing:0.5px;
+  }
+  .linkbtn{
+    background:none;border:none;color:var(--ink-soft);
+    font-size:13px;font-family:'Noto Sans TC',sans-serif;
+    text-decoration:underline;cursor:pointer;padding:4px;
+  }
+  main{
+    flex:1;
+    padding:8px 20px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+  h1.hero{
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:26px;
+    line-height:1.4;
+    margin:4px 0 4px;
+  }
+  p.sub{
+    color:var(--ink-soft);
+    font-size:14px;
+    line-height:1.7;
+    margin:0 0 4px;
+  }
+  label.field-label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--brand-dark);
+    letter-spacing:0.5px;
+    margin-bottom:6px;
+  }
+  input[type=text], select{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-size:16px;
+    font-family:'Noto Sans TC',sans-serif;
+    background:#FBFDFC;
+    color:var(--ink);
+  }
+  input[type=text]:focus, select:focus{
+    outline:none;
+    border-color:var(--brand);
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:13px 20px;
+    border-radius:10px;
+    border:none;
+    font-size:15px;
+    font-weight:700;
+    font-family:'Noto Sans TC',sans-serif;
+    cursor:pointer;
+    width:100%;
+  }
+  .btn-primary{ background:var(--brand); color:#fff; }
+  .btn-primary:active{ background:var(--brand-dark); }
+  .btn-ghost{ background:#fff; color:var(--brand); border:1.5px solid var(--brand); }
+  .btn-amber{ background:var(--amber); color:#3A2A05; }
+  .btn-row{ display:flex; gap:10px; }
+  .btn-row .btn{ flex:1; }
+  .chip-grid{
+    display:flex; flex-wrap:wrap; gap:8px;
+  }
+  .chip{
+    padding:9px 12px;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    font-size:13px;
+    font-family:'Space Mono',monospace;
+    cursor:pointer;
+    color:var(--ink-soft);
+    user-select:none;
+  }
+  .chip.on{
+    background:var(--brand);
+    border-color:var(--brand);
+    color:#fff;
+  }
+  .cal-nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:2px 2px 10px;
+  }
+  .cal-nav button{
+    background:#FBFDFC; border:1.5px solid var(--line); border-radius:8px;
+    width:34px; height:34px; font-size:16px; color:var(--brand-dark);
+    cursor:pointer;
+  }
+  .cal-nav .cal-label{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:15px; }
+  .cal-grid{
+    display:grid; grid-template-columns:repeat(7,1fr); gap:4px;
+  }
+  .cal-wd{
+    text-align:center; font-size:11px; color:var(--ink-soft);
+    font-family:'Space Mono',monospace; padding-bottom:4px;
+  }
+  .daycell{
+    aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:8px; border:1.5px solid var(--line);
+    background:#FBFDFC;
+    font-size:13px; font-family:'Space Mono',monospace; color:var(--ink);
+    cursor:pointer; user-select:none;
+  }
+  .daycell.empty{ visibility:hidden; cursor:default; }
+  .daycell.past{ color:#C9D3D0; border-color:#EEF2F1; cursor:not-allowed; background:#F7F9F8; }
+  .daycell.sel{ background:var(--brand); border-color:var(--brand); color:#fff; font-weight:700; }
+  .cal-summary{ font-size:12px; color:var(--ink-soft); margin-top:8px; }
+  .cal-summary b{ color:var(--brand-dark); }
+  .row2{ display:flex; gap:10px; }
+  .row2 > div{ flex:1; }
+  .hint{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+  .error-box{
+    background:#FBEBE7; color:var(--danger);
+    border:1px solid #EFC4B9; border-radius:10px;
+    padding:10px 14px; font-size:13px;
+  }
+  .loading{
+    display:flex; align-items:center; justify-content:center;
+    padding:60px 0; color:var(--ink-soft); font-size:14px;
+    flex-direction:column; gap:10px;
+  }
+  .spin{
+    width:26px;height:26px;border-radius:50%;
+    border:3px solid var(--line); border-top-color:var(--brand);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .poll-header{
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .poll-title{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:19px; }
+  .poll-meta{ font-size:12px; color:var(--ink-soft); font-family:'Space Mono',monospace; }
+
+  .grid-wrap{ overflow-x:auto; border-radius:10px; }
+  table.grid{ border-collapse:separate; border-spacing:5px; width:max-content; min-width:100%; }
+  table.grid th, table.grid td{ padding:0; }
+  th.timecol, td.timecol{
+    position:sticky; left:0; z-index:2;
+    background:var(--bg);
+    font-family:'Space Mono',monospace;
+    font-size:11px; color:var(--ink-soft);
+    text-align:right; padding-right:8px;
+    white-space:nowrap;
+    min-width:52px;
+  }
+  th.datecol{
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:'Noto Sans TC',sans-serif;
+    font-size:14px; font-weight:700; color:var(--ink);
+    text-align:center; padding:8px 4px;
+    position:sticky; top:0; z-index:1;
+  }
+  th.datecol.weekend{ color:var(--amber-dark); border-color:#F0DBB4; background:#FDF7EB; }
+  th.datecol .wd{ color:var(--ink-soft); font-family:'Space Mono',monospace; font-weight:400; display:block; font-size:10px; margin-top:1px; }
+  th.datecol.weekend .wd{ color:var(--amber-dark); opacity:0.75; }
+  th.corner{ position:sticky; left:0; top:0; z-index:3; background:var(--bg); }
+  .col-quick{
+    font-size:9px; color:var(--brand); cursor:pointer; text-decoration:underline;
+    display:block; margin-top:3px;
+  }
+  .cell{
+    width:42px; height:34px;
+    border-radius:9px;
+    background:var(--heat-0);
+    cursor:pointer;
+    position:relative;
+  }
+  .cell.mine{ background:var(--heat-3); }
+  .cell.mine:active{ background:var(--heat-4); }
+  .cell.full::after{
+    content:'\2605';
+    position:absolute; top:2px; right:3px;
+    font-size:9px; color:#fff;
+  }
+  .cell .cnt{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:11px; font-weight:700; color:var(--ink);
+    pointer-events:none;
+  }
+  .legend{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-soft); flex-wrap:wrap; }
+  .legend .sw{ width:14px;height:14px;border-radius:3px; display:inline-block; }
+
+  .tag-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .tag{
+    background:var(--heat-1); color:var(--brand-dark);
+    padding:5px 10px; border-radius:999px; font-size:12px; font-weight:700;
+  }
+  .popover{
+    background:#FBFDFC; border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px; font-size:13px; color:var(--ink-soft);
+  }
+  .popover b{ color:var(--ink); }
+  footer.tip{
+    text-align:center; font-size:11px; color:var(--ink-soft);
+    padding:6px 24px 0;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="brand"><span class="pin"></span><span class="brand-text">揪時間</span></div>
+    <button class="linkbtn" id="backBtn" style="display:none;">回首頁</button>
+  </div>
+  <main id="main">
+    <div class="loading"><div class="spin"></div>正在準備中…</div>
+  </main>
+  <footer class="tip" id="tip"></footer>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/versions/2.24.0/sdk.js"></script>
+<script type="module">
+/* ============ 設定區：把你的 LIFF ID 與 Firebase 設定貼在這裡 ============ */
+const LIFF_ID = "2010635952-xgqmvBgZ";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD-ggTej3huh0GePJbau6JutfqcSRLk4_M",
+  authDomain: "jio-time-4ff97.firebaseapp.com",
+  projectId: "jio-time-4ff97",
+  storageBucket: "jio-time-4ff97.firebasestorage.app",
+  messagingSenderId: "960387124543",
+  appId: "1:960387124543:web:4d2688257026341652578a"
+};
+/* ======================================================================= */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, collection, getDocs, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const fbApp = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(fbApp);
+
+const $main = document.getElementById('main');
+const $tip = document.getElementById('tip');
+const $back = document.getElementById('backBtn');
+
+let state = {
+  screen: 'loading',
+  code: null,       // poll 文件代碼（群組自動帶入，或手動代碼）
+  isAutoGroup: false,
+  config: null,      // {title, dates, startHour, endHour, slotMinutes}
+  me: { userId: null, name: '' },
+  mySlots: new Set(),
+  avail: {},         // name -> {slots:[], userId}
+};
+
+const WD = ['日','一','二','三','四','五','六'];
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+
+function buildSlots(cfg){
+  const times = [];
+  const stepH = cfg.slotMinutes/60;
+  for(let t = cfg.startHour; t < cfg.endHour; t += stepH){
+    const h = Math.floor(t), m = Math.round((t-h)*60);
+    times.push({h,m,id:`${pad(h)}${pad(m)}`,label:`${pad(h)}:${pad(m)}`});
+  }
+  return times;
+}
+
+function dateRange(startIso, endIso){
+  const out = [];
+  let d = new Date(startIso+'T00:00:00');
+  const end = new Date(endIso+'T00:00:00');
+  while(d <= end){
+    const iso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    out.push({iso, wd: WD[d.getDay()], md:`${d.getMonth()+1}/${d.getDate()}`});
+    d.setDate(d.getDate()+1);
+  }
+  return out;
+}
+
+function slotId(dateIso, timeId){ return `${dateIso}_${timeId}`; }
+
+async function safeGet(ref){
+  try{
+    const snap = await getDoc(ref);
+    return snap.exists() ? snap.data() : null;
+  }catch(e){
+    console.error('讀取失敗', e);
+    return null;
+  }
+}
+
+function genCode(){
+  return Math.random().toString(36).slice(2,8);
+}
+
+async function boot(){
+  try{
+    await liff.init({ liffId: LIFF_ID });
+    if(!liff.isLoggedIn() && !liff.isInClient()){
+      liff.login();
+      return;
+    }
+    let profile = null;
+    try{ profile = await liff.getProfile(); }catch(e){ /* 不在 LINE 內或未授權 */ }
+    state.me.userId = profile ? profile.userId : ('guest_'+Math.random().toString(36).slice(2,8));
+    state.me.name = profile ? profile.displayName : '';
+
+    const params = new URLSearchParams(window.location.search);
+    let codeFromUrl = params.get('code');
+    if(!codeFromUrl){
+      const ctx = liff.getContext ? liff.getContext() : null;
+      const autoId = ctx && (ctx.type==='group' ? ctx.groupId : ctx.type==='room' ? ctx.roomId : null);
+      if(autoId) codeFromUrl = autoId;
+    }
+    if(codeFromUrl){
+      state.code = codeFromUrl;
+      try{ localStorage.setItem('jio_time_code', codeFromUrl); }catch(e){}
+      await enterPoll();
+    } else {
+      let savedCode = null;
+      try{ savedCode = localStorage.getItem('jio_time_code'); }catch(e){}
+      if(savedCode){
+        state.code = savedCode;
+        await enterPoll();
+      } else {
+        state.code = genCode();
+        try{ localStorage.setItem('jio_time_code', state.code); }catch(e){}
+        state.screen = 'setup';
+        render();
+      }
+    }
+  }catch(e){
+    console.error(e);
+    $main.innerHTML = `<div class="card"><p class="error-box">LIFF 初始化失敗，請確認 LIFF ID 是否設定正確，或改用手機 LINE 開啟這個連結。</p></div>`;
+  }
+}
+
+async function enterPoll(){
+  state.screen = 'loading';
+  render();
+  const cfgSnap = await safeGet(doc(db,'polls', state.code));
+  if(cfgSnap){
+    state.config = cfgSnap;
+    await loadAvail();
+    state.screen = 'hub';
+  } else {
+    state.screen = 'setup';
+  }
+  render();
+}
+
+async function loadAvail(){
+  state.avail = {};
+  try{
+    const snaps = await getDocs(collection(db,'polls', state.code, 'availability'));
+    snaps.forEach(d=>{ state.avail[d.id] = d.data(); });
+  }catch(e){ console.error(e); }
+}
+
+/* ---------- 畫面渲染 ---------- */
+function render(){
+  $back.style.display = (state.screen==='fill'||state.screen==='results') ? 'inline' : 'none';
+  $tip.textContent = state.screen==='entry' ? '把這個 LIFF 連結分享到 LINE 群組，點開後大家就在同一份表單裡' : '';
+  if(state.screen==='loading') return renderLoading();
+  if(state.screen==='entry') return renderEntry();
+  if(state.screen==='setup') return renderSetup();
+  if(state.screen==='share') return renderShare();
+  if(state.screen==='hub') return renderHub();
+  if(state.screen==='fill') return renderFill();
+  if(state.screen==='results') return renderResults();
+}
+
+function renderLoading(){
+  $main.innerHTML = `<div class="loading"><div class="spin"></div>正在準備中…</div>`;
+}
+
+function renderEntry(){
+  $main.innerHTML = `
+    <div class="card">
+      <h1 class="hero">四個人的空檔，<br>一次揪出來</h1>
+      <p class="sub">在 LINE 群組裡點開這個連結會自動配對群組；現在你是自己開啟測試，請輸入一組代碼（跟朋友用同一組代碼就會看到同一份表）。</p>
+      <label class="field-label">群組代碼</label>
+      <input type="text" id="codeInput" placeholder="例如 abcd">
+      <div style="height:12px"></div>
+      <button class="btn btn-primary" id="goBtn">開始 / 加入</button>
+    </div>`;
+  document.getElementById('goBtn').onclick = ()=>{
+    const v = document.getElementById('codeInput').value.trim();
+    if(!v){ return; }
+    state.code = v;
+    enterPoll();
+  };
+}
+
+function renderSetup(){
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  let viewYear = now.getFullYear();
+  let viewMonth = now.getMonth(); // 0-11
+  let selected = new Set();
+  const hourOpts = arr=>arr.map(h=>`<option value="${h}">${pad(h)}:00</option>`).join('');
+  const hours = Array.from({length:24},(_,i)=>i);
+
+  $main.innerHTML = `
+    <div class="card">
+      <h1 class="hero" style="font-size:20px;">建立這次的時間調查</h1>
+      <p class="sub">還沒有人建立過表單，設定一下範圍，等等就能開始填時間。</p>
+      <label class="field-label">標題</label>
+      <input type="text" id="titleInput" placeholder="例如：週末聚餐時間" value="大家的空檔">
+      <div style="height:14px"></div>
+      <label class="field-label">候選日期（點選，可跨月份、可複選）</label>
+      <div class="cal-nav">
+        <button type="button" id="prevMonth">‹</button>
+        <span class="cal-label" id="calLabel"></span>
+        <button type="button" id="nextMonth">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-summary" id="calSummary"></div>
+      <div style="height:14px"></div>
+      <div class="row2">
+        <div>
+          <label class="field-label">開始時間</label>
+          <select id="startHour">${hourOpts(hours)}</select>
+        </div>
+        <div>
+          <label class="field-label">結束時間</label>
+          <select id="endHour">${hourOpts(hours)}</select>
+        </div>
+      </div>
+      <div class="hint">結束時間不含在內，例如填 22:00 表示最後一格是 21:xx</div>
+      <div style="height:14px"></div>
+      <label class="field-label">時間間隔</label>
+      <select id="slotMinutes">
+        <option value="60">1 小時一格</option>
+        <option value="30">30 分鐘一格</option>
+      </select>
+      <div style="height:14px"></div>
+      <label class="field-label">這次總共有幾個人要填</label>
+      <input type="text" id="expectedPeople" inputmode="numeric" value="4" placeholder="例如 4">
+      <div class="hint">湊齊這個人數都有空的時段，才會標上 ★</div>
+      <div style="height:16px"></div>
+      <div id="setupError"></div>
+      <button class="btn btn-primary" id="createBtn">建立表單</button>
+    </div>`;
+  document.getElementById('startHour').value = 9;
+  document.getElementById('endHour').value = 22;
+
+  function drawCalendar(){
+    const label = document.getElementById('calLabel');
+    label.textContent = `${viewYear} 年 ${viewMonth+1} 月`;
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const startWd = firstDay.getDay();
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    const wdHeader = ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-wd">${w}</div>`).join('');
+    let cells = '';
+    for(let i=0;i<startWd;i++){ cells += `<div class="daycell empty"></div>`; }
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = `${viewYear}-${pad(viewMonth+1)}-${pad(d)}`;
+      const isPast = iso < todayIso;
+      const isSel = selected.has(iso);
+      cells += `<div class="daycell ${isPast?'past':''} ${isSel?'sel':''}" data-iso="${iso}">${d}</div>`;
+    }
+    document.getElementById('calGrid').innerHTML = wdHeader + cells;
+    document.querySelectorAll('.daycell:not(.empty):not(.past)').forEach(c=>{
+      c.onclick = ()=>{
+        const iso = c.dataset.iso;
+        if(selected.has(iso)){ selected.delete(iso); c.classList.remove('sel'); }
+        else{ selected.add(iso); c.classList.add('sel'); }
+        updateSummary();
+      };
+    });
+    updateSummary();
+  }
+  function updateSummary(){
+    document.getElementById('calSummary').innerHTML = selected.size
+      ? `已選 <b>${selected.size}</b> 天`
+      : `還沒選任何日期，點上面的格子選日期`;
+  }
+  document.getElementById('prevMonth').onclick = ()=>{
+    viewMonth--; if(viewMonth<0){ viewMonth=11; viewYear--; }
+    drawCalendar();
+  };
+  document.getElementById('nextMonth').onclick = ()=>{
+    viewMonth++; if(viewMonth>11){ viewMonth=0; viewYear++; }
+    drawCalendar();
+  };
+  drawCalendar();
+
+  document.getElementById('createBtn').onclick = async ()=>{
+    const title = document.getElementById('titleInput').value.trim() || '大家的空檔';
+    const dates = Array.from(selected).sort();
+    const startHour = parseInt(document.getElementById('startHour').value);
+    const endHour = parseInt(document.getElementById('endHour').value);
+    const slotMinutes = parseInt(document.getElementById('slotMinutes').value);
+    const expectedPeople = parseInt(document.getElementById('expectedPeople').value) || 0;
+    const errBox = document.getElementById('setupError');
+    if(dates.length===0){ errBox.innerHTML = `<p class="error-box">請至少選一個日期</p>`; return; }
+    if(endHour <= startHour){ errBox.innerHTML = `<p class="error-box">結束時間要晚於開始時間</p>`; return; }
+    if(expectedPeople <= 0){ errBox.innerHTML = `<p class="error-box">請填入正確的人數</p>`; return; }
+    const cfg = { title, dates, startHour, endHour, slotMinutes, expectedPeople, createdAt: Date.now() };
+    try{
+      await setDoc(doc(db,'polls', state.code), cfg);
+      state.config = cfg;
+      state.avail = {};
+      state.screen = 'share';
+      render();
+    }catch(e){
+      console.error(e);
+      errBox.innerHTML = `<p class="error-box">建立失敗，請確認 Firebase 設定是否正確。</p>`;
+    }
+  };
+}
+
+function renderShare(){
+  const link = `https://liff.line.me/${LIFF_ID}?code=${state.code}`;
+  $main.innerHTML = `
+    <div class="card">
+      <h1 class="hero" style="font-size:20px;">表單建立好了</h1>
+      <p class="sub">把下面這整段連結貼到你們的 LINE 群組裡，大家點開這個連結，看到的都會是同一份表單。</p>
+      <div style="background:#FBFDFC;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font-family:'Space Mono',monospace;font-size:13px;word-break:break-all;color:var(--brand-dark);">${link}</div>
+      <div style="height:12px"></div>
+      <button class="btn btn-amber" id="copyBtn">複製連結</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-primary" id="continueBtn">先填我的時間</button>
+    </div>`;
+  document.getElementById('copyBtn').onclick = async ()=>{
+    const btn = document.getElementById('copyBtn');
+    try{
+      await navigator.clipboard.writeText(link);
+      btn.textContent = '已複製 ✓';
+      setTimeout(()=>{ btn.textContent = '複製連結'; }, 2000);
+    }catch(e){
+      window.prompt('請手動複製這個連結：', link);
+    }
+  };
+  document.getElementById('continueBtn').onclick = ()=>{ state.screen='fill'; render(); };
+}
+
+function renderHub(){
+  const cfg = state.config;
+  const n = Object.keys(state.avail).length;
+  $main.innerHTML = `
+    <div class="card">
+      <div class="poll-header">
+        <div class="poll-title">${cfg.title}</div>
+        <div class="poll-meta">${cfg.dates.length} 個候選日期・已有 ${n} / ${cfg.expectedPeople||'?'} 人填寫</div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="fillBtn">填我的時間</button>
+        <button class="btn btn-ghost" id="resultBtn">看大家的空檔</button>
+      </div>
+      <div style="height:12px"></div>
+      <div class="btn-row">
+        <button class="linkbtn" id="shareBtn" style="width:100%;text-align:center;">查看分享連結</button>
+        <button class="linkbtn" id="newPollBtn" style="width:100%;text-align:center;">開新的一次調查</button>
+      </div>
+    </div>`;
+  document.getElementById('fillBtn').onclick = ()=>{ state.screen='fill'; render(); };
+  document.getElementById('resultBtn').onclick = ()=>{ state.screen='results'; render(); };
+  document.getElementById('shareBtn').onclick = ()=>{ state.screen='share'; render(); };
+  document.getElementById('newPollBtn').onclick = ()=>{
+    state.code = genCode();
+    try{ localStorage.setItem('jio_time_code', state.code); }catch(e){}
+    state.config = null;
+    state.avail = {};
+    state.screen = 'setup';
+    render();
+  };
+}
+
+function renderFill(){
+  const cfg = state.config;
+  const times = buildSlots(cfg);
+  const days = cfg.dates.map(iso=>{
+    const d = new Date(iso+'T00:00:00');
+    return { iso, wd: WD[d.getDay()], md:`${d.getMonth()+1}/${d.getDate()}` };
+  });
+
+  // 預帶入自己之前填過的資料
+  const mine = state.avail[state.me.userId] || state.avail[state.me.name];
+  state.mySlots = new Set(mine ? mine.slots : []);
+
+  const headerCells = days.map(d=>{
+    const isWeekend = d.wd==='六'||d.wd==='日';
+    return `
+    <th class="datecol ${isWeekend?'weekend':''}" data-iso="${d.iso}">
+      ${d.md}<span class="wd">週${d.wd}</span>
+      <span class="col-quick" data-act="all" data-iso="${d.iso}">整天可以</span>
+      <span class="col-quick" data-act="none" data-iso="${d.iso}">清空</span>
+    </th>`;}).join('');
+
+  const bodyRows = times.map(t=>{
+    const cells = days.map(d=>{
+      const sid = slotId(d.iso, t.id);
+      const on = state.mySlots.has(sid);
+      return `<td class="cell ${on?'mine':''}" data-slot="${sid}"></td>`;
+    }).join('');
+    return `<tr><td class="timecol">${t.label}</td>${cells}</tr>`;
+  }).join('');
+
+  $main.innerHTML = `
+    <div class="card">
+      <div class="poll-header">
+        <div class="poll-title">${cfg.title}</div>
+        <div class="poll-meta">點格子標記你有空的時間</div>
+      </div>
+      <div style="height:6px"></div>
+      <button class="linkbtn" id="addDateToggle" style="padding-left:0;">+ 補選其他候選日期</button>
+      <div id="addDateBox" style="display:none;margin-top:10px;"></div>
+      <div style="height:10px"></div>
+      <label class="field-label">你的名字</label>
+      <input type="text" id="nameInput" value="${state.me.name || ''}" placeholder="輸入名字">
+      <div style="height:12px"></div>
+      <div class="grid-wrap">
+        <table class="grid">
+          <thead><tr><th class="corner"></th>${headerCells}</tr></thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
+      <div style="height:14px"></div>
+      <div id="fillError"></div>
+      <button class="btn btn-primary" id="saveBtn">儲存我的時間</button>
+    </div>`;
+
+  document.getElementById('addDateToggle').onclick = ()=>{
+    const box = document.getElementById('addDateBox');
+    if(box.style.display==='none'){ box.style.display='block'; renderAddDatePicker(box); }
+    else{ box.style.display='none'; }
+  };
+
+  document.querySelectorAll('.cell').forEach(cell=>{
+    cell.onclick = ()=>{
+      const sid = cell.dataset.slot;
+      if(state.mySlots.has(sid)){ state.mySlots.delete(sid); cell.classList.remove('mine'); }
+      else{ state.mySlots.add(sid); cell.classList.add('mine'); }
+    };
+  });
+  document.querySelectorAll('.col-quick').forEach(q=>{
+    q.onclick = (e)=>{
+      e.stopPropagation();
+      const iso = q.dataset.iso, act = q.dataset.act;
+      document.querySelectorAll(`.cell[data-slot^="${iso}_"]`).forEach(cell=>{
+        const sid = cell.dataset.slot;
+        if(act==='all'){ state.mySlots.add(sid); cell.classList.add('mine'); }
+        else{ state.mySlots.delete(sid); cell.classList.remove('mine'); }
+      });
+    };
+  });
+
+  document.getElementById('saveBtn').onclick = async ()=>{
+    const name = document.getElementById('nameInput').value.trim();
+    const errBox = document.getElementById('fillError');
+    if(!name){ errBox.innerHTML = `<p class="error-box">請輸入名字</p>`; return; }
+    state.me.name = name;
+    try{
+      await setDoc(doc(db,'polls', state.code, 'availability', state.me.userId), {
+        name, slots: Array.from(state.mySlots), updatedAt: serverTimestamp()
+      });
+      await loadAvail();
+      state.screen = 'results';
+      render();
+    }catch(e){
+      console.error(e);
+      errBox.innerHTML = `<p class="error-box">儲存失敗，請確認 Firebase 設定與權限規則。</p>`;
+    }
+  };
+}
+
+function renderAddDatePicker(box){
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  let viewYear = now.getFullYear();
+  let viewMonth = now.getMonth();
+  const existing = new Set(state.config.dates);
+  let picked = new Set();
+
+  box.innerHTML = `
+    <div class="cal-nav">
+      <button type="button" id="addPrevMonth">‹</button>
+      <span class="cal-label" id="addCalLabel"></span>
+      <button type="button" id="addNextMonth">›</button>
+    </div>
+    <div class="cal-grid" id="addCalGrid"></div>
+    <div class="cal-summary" id="addCalSummary"></div>
+    <div style="height:10px"></div>
+    <button class="btn btn-amber" id="addDateConfirm" style="padding:10px;">加入這些日期</button>
+    <div id="addDateErr"></div>`;
+
+  function draw(){
+    document.getElementById('addCalLabel').textContent = `${viewYear} 年 ${viewMonth+1} 月`;
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const startWd = firstDay.getDay();
+    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    const wdHeader = ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-wd">${w}</div>`).join('');
+    let cells = '';
+    for(let i=0;i<startWd;i++){ cells += `<div class="daycell empty"></div>`; }
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = `${viewYear}-${pad(viewMonth+1)}-${pad(d)}`;
+      const isPast = iso < todayIso;
+      const already = existing.has(iso);
+      const isSel = picked.has(iso);
+      const cls = already ? 'sel' : (isSel ? 'sel' : '');
+      cells += `<div class="daycell ${isPast?'past':''} ${cls}" data-iso="${iso}" ${already?'data-already="1"':''}>${d}</div>`;
+    }
+    document.getElementById('addCalGrid').innerHTML = wdHeader + cells;
+    document.querySelectorAll('#addCalGrid .daycell:not(.empty):not(.past)').forEach(c=>{
+      if(c.dataset.already) return;
+      c.onclick = ()=>{
+        const iso = c.dataset.iso;
+        if(picked.has(iso)){ picked.delete(iso); c.classList.remove('sel'); }
+        else{ picked.add(iso); c.classList.add('sel'); }
+        updateSummary();
+      };
+    });
+    updateSummary();
+  }
+  function updateSummary(){
+    document.getElementById('addCalSummary').innerHTML = picked.size
+      ? `將新增 <b>${picked.size}</b> 天`
+      : `深色的日期是已經在表單裡的，點空格加新的`;
+  }
+  document.getElementById('addPrevMonth').onclick = ()=>{ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} draw(); };
+  document.getElementById('addNextMonth').onclick = ()=>{ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} draw(); };
+  draw();
+
+  document.getElementById('addDateConfirm').onclick = async ()=>{
+    const errBox = document.getElementById('addDateErr');
+    if(picked.size===0){ errBox.innerHTML = `<p class="error-box">先點選要新增的日期</p>`; return; }
+    const merged = Array.from(new Set([...state.config.dates, ...picked])).sort();
+    try{
+      await setDoc(doc(db,'polls', state.code), { ...state.config, dates: merged });
+      state.config.dates = merged;
+      state.screen = 'fill';
+      render();
+    }catch(e){
+      console.error(e);
+      errBox.innerHTML = `<p class="error-box">新增失敗，請確認網路連線。</p>`;
+    }
+  };
+}
+
+function heatColor(count, total){
+  if(total<=0) return 'var(--heat-0)';
+  const ratio = count/total;
+  if(count===0) return 'var(--heat-0)';
+  if(ratio>=1) return 'var(--heat-4)';
+  if(ratio>=0.66) return 'var(--heat-3)';
+  if(ratio>=0.33) return 'var(--heat-2)';
+  return 'var(--heat-1)';
+}
+
+function renderResults(){
+  const cfg = state.config;
+  const times = buildSlots(cfg);
+  const days = cfg.dates.map(iso=>{
+    const d = new Date(iso+'T00:00:00');
+    return { iso, wd: WD[d.getDay()], md:`${d.getMonth()+1}/${d.getDate()}` };
+  });
+  const people = Object.values(state.avail);
+  const total = people.length;
+  const expected = cfg.expectedPeople || total || 1;
+
+  const slotCount = {};
+  const slotNames = {};
+  people.forEach(p=>{
+    (p.slots||[]).forEach(sid=>{
+      slotCount[sid] = (slotCount[sid]||0)+1;
+      (slotNames[sid] = slotNames[sid]||[]).push(p.name);
+    });
+  });
+
+  const headerCells = days.map(d=>{
+    const isWeekend = d.wd==='六'||d.wd==='日';
+    return `<th class="datecol ${isWeekend?'weekend':''}">${d.md}<span class="wd">週${d.wd}</span></th>`;
+  }).join('');
+  const bodyRows = times.map(t=>{
+    const cells = days.map(d=>{
+      const sid = slotId(d.iso, t.id);
+      const c = slotCount[sid]||0;
+      const full = c>0 && c>=expected;
+      return `<td class="cell ${full?'full':''}" data-slot="${sid}" style="background:${heatColor(c,expected)}"><span class="cnt">${c>0?c:''}</span></td>`;
+    }).join('');
+    return `<tr><td class="timecol">${t.label}</td>${cells}</tr>`;
+  }).join('');
+
+  const tags = people.length
+    ? `<div class="tag-row">${people.map(p=>`<span class="tag">${p.name}</span>`).join('')}</div>`
+    : `<p class="sub">還沒有人填喔，當第一個吧！</p>`;
+
+  $main.innerHTML = `
+    <div class="card">
+      <div class="poll-header">
+        <div class="poll-title">${cfg.title}</div>
+        <div class="poll-meta">已有 ${total} / ${expected} 人填寫・★ = 湊齊 ${expected} 人都有空</div>
+      </div>
+      <div style="height:10px"></div>
+      ${tags}
+      <div style="height:14px"></div>
+      <div class="grid-wrap">
+        <table class="grid">
+          <thead><tr><th class="corner"></th>${headerCells}</tr></thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
+      <div style="height:10px"></div>
+      <div class="legend">
+        <span class="sw" style="background:var(--heat-0)"></span>沒人
+        <span class="sw" style="background:var(--heat-2)"></span>部分
+        <span class="sw" style="background:var(--heat-4)"></span>全員 ★
+      </div>
+      <div id="popoverBox"></div>
+      <div style="height:14px"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="editBtn">更新我的時間</button>
+        <button class="btn btn-ghost" id="refreshBtn">重新整理</button>
+      </div>
+    </div>`;
+
+  document.querySelectorAll('.cell').forEach(cell=>{
+    cell.onclick = ()=>{
+      const sid = cell.dataset.slot;
+      const names = slotNames[sid];
+      const box = document.getElementById('popoverBox');
+      box.innerHTML = names && names.length
+        ? `<div class="popover" style="margin-top:10px;"><b>${names.join('、')}</b> 這個時段有空</div>`
+        : `<div class="popover" style="margin-top:10px;">這個時段還沒人選</div>`;
+    };
+  });
+  document.getElementById('editBtn').onclick = ()=>{ state.screen='fill'; render(); };
+  document.getElementById('refreshBtn').onclick = async ()=>{
+    state.screen='loading'; render();
+    await loadAvail();
+    state.screen='results'; render();
+  };
+}
+
+$back.onclick = ()=>{ state.screen='hub'; render(); };
+
+boot();
+</script>
+</body>
+</html>
